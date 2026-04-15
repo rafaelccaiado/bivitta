@@ -9,17 +9,13 @@ export async function GET() {
     const [kpis, porDia, porUnidade] = await Promise.all([
 
       runQuery(`
-        SELECT
-          COUNT(*) AS total_agendamentos
+        SELECT COUNT(*) AS total_agendamentos
         FROM \`${PROJECT}.${DS}.agendamentos\`
         WHERE DATE(start_exec) >= DATE_TRUNC(DATE_SUB(CURRENT_DATE(),INTERVAL 1 MONTH),MONTH)
       `),
 
       runQuery(`
-        SELECT
-          DATE(start_exec) AS data,
-          FORMAT_DATE('%d/%m', DATE(start_exec)) AS data_fmt,
-          COUNT(*) AS total
+        SELECT DATE(start_exec) AS data, COUNT(*) AS total
         FROM \`${PROJECT}.${DS}.agendamentos\`
         WHERE DATE(start_exec) >= DATE_SUB(CURRENT_DATE(), INTERVAL 60 DAY)
           AND DATE(start_exec) < CURRENT_DATE()
@@ -29,9 +25,7 @@ export async function GET() {
       `),
 
       runQuery(`
-        SELECT
-          name_unit AS unidade,
-          COUNT(*) AS total
+        SELECT name_unit AS unidade, COUNT(*) AS total
         FROM \`${PROJECT}.${DS}.agendamentos\`
         WHERE DATE(start_exec) >= DATE_TRUNC(CURRENT_DATE(),MONTH)
         GROUP BY name_unit
@@ -42,18 +36,9 @@ export async function GET() {
 
     const k = kpis[0] || {};
     return NextResponse.json({
-      kpis: {
-        agendados_mtd: Number(k.total_agendamentos || 0),
-        realizados_mtd: 0,
-      },
-      porDia: (porDia as { data: string; data_fmt: string; total: number }[]).map(r => ({
-        data: r.data_fmt,
-        total: Number(r.total),
-      })),
-      porUnidade: (porUnidade as { unidade: string; total: number }[]).map(r => ({
-        unidade: r.unidade,
-        total: Number(r.total),
-      })),
+      kpis: { agendados_mtd: Number(k.total_agendamentos || 0) },
+      porDia: (porDia as { data: string; total: number }[]).map(r => ({ data: r.data, total: Number(r.total) })),
+      porUnidade: (porUnidade as { unidade: string; total: number }[]).map(r => ({ unidade: r.unidade, total: Number(r.total) })),
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
