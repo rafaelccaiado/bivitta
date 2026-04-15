@@ -16,18 +16,17 @@ export async function GET() {
         AND DATE_TRUNC(criado_em_data, MONTH) = DATE_TRUNC(CURRENT_DATE(), MONTH)
     `);
 
-    // Por unidade
-    const porUnidade = await runQuery(`
+    // Por dia (últimos 30 dias)
+    const porDia = await runQuery(`
       SELECT 
-        name_unit as unidade,
+        FORMAT_DATE('%d/%m', criado_em_data) as data,
         SUM(valor_total) as receita,
         COUNT(*) as pedidos
       FROM \`${PROJECT}.${DS}.pedidos_venda\`
       WHERE status IN ('Nota Emitida', 'Pago')
-        AND DATE_TRUNC(criado_em_data, MONTH) = DATE_TRUNC(CURRENT_DATE(), MONTH)
-      GROUP BY name_unit
-      ORDER BY receita DESC
-      LIMIT 20
+        AND criado_em_data >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
+      GROUP BY FORMAT_DATE('%d/%m', criado_em_data), DATE(criado_em_data)
+      ORDER BY DATE(criado_em_data) ASC
     `);
 
     // Evolução mensal
@@ -41,19 +40,6 @@ export async function GET() {
         AND criado_em_data >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH)
       GROUP BY FORMAT_DATE('%b/%y', DATE_TRUNC(criado_em_data, MONTH))
       ORDER BY MIN(criado_em_data) ASC
-    `);
-
-    // Por dia (últimos 30 dias)
-    const porDia = await runQuery(`
-      SELECT 
-        FORMAT_DATE('%d/%m', criado_em_data) as data,
-        SUM(valor_total) as receita,
-        COUNT(*) as pedidos
-      FROM \`${PROJECT}.${DS}.pedidos_venda\`
-      WHERE status IN ('Nota Emitida', 'Pago')
-        AND criado_em_data >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)
-      GROUP BY FORMAT_DATE('%d/%m', criado_em_data), DATE(criado_em_data)
-      ORDER BY DATE(criado_em_data) ASC
     `);
 
     // Por grupo
@@ -101,14 +87,7 @@ export async function GET() {
         pedidos: Number(r.pedidos),
         ticket_medio: Number(r.pedidos) > 0 ? Number(r.receita) / Number(r.pedidos) : 0,
       })),
-      porUnidade: porUnidade.map((r: any) => ({
-        unidade: r.unidade,
-        receita: Number(r.receita),
-        receita_liq: Number(r.receita) * 0.7,
-        pedidos: Number(r.pedidos),
-        ticket_medio: Number(r.pedidos) > 0 ? Number(r.receita) / Number(r.pedidos) : 0,
-        pacientes: 0,
-      })),
+      porUnidade: [],
       porGrupo: porGrupo.map((r: any) => ({
         grupo: r.grupo,
         receita: Number(r.receita),

@@ -6,7 +6,7 @@ const DS = 'vtntprod_vitta_core';
 
 export async function GET() {
   try {
-    // KPIs principais
+    // Total de pacientes (da view)
     const kpis = await runQuery(`
       SELECT 
         COUNT(*) as total_pacientes,
@@ -14,26 +14,15 @@ export async function GET() {
       FROM \`${PROJECT}.${DS}.vw_growth_inteligencia_clientes\`
     `);
 
-    // Por mês (últimos 12)
+    // Por mês (últimos 12) - usar uma data disponível
     const porMes = await runQuery(`
       SELECT 
-        FORMAT_DATE('%b/%y', DATE_TRUNC(criado_em_data, MONTH)) as mes,
+        FORMAT_DATE('%b/%y', DATE_TRUNC(created_at, MONTH)) as mes,
         COUNT(*) as total
       FROM \`${PROJECT}.${DS}.vw_growth_inteligencia_clientes\`
-      WHERE criado_em_data >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH)
+      WHERE created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH)
       GROUP BY 1
-      ORDER BY MIN(criado_em_data) ASC
-    `);
-
-    // Por unidade
-    const porUnidade = await runQuery(`
-      SELECT 
-        name_unit as unidade,
-        COUNT(*) as total
-      FROM \`${PROJECT}.${DS}.vw_growth_inteligencia_clientes\`
-      GROUP BY name_unit
-      ORDER BY total DESC
-      LIMIT 15
+      ORDER BY MIN(created_at) ASC
     `);
 
     const k = kpis[0] || {};
@@ -49,10 +38,7 @@ export async function GET() {
         mes: r.mes,
         total: Number(r.total),
       })),
-      porUnidade: porUnidade.map((r: any) => ({
-        unidade: r.unidade,
-        total: Number(r.total),
-      })),
+      porUnidade: [],
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
