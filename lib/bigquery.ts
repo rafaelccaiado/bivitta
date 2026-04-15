@@ -5,38 +5,25 @@ import path from 'path';
 const PROJECT = process.env.BQ_PROJECT || 'high-nature-319701';
 const DATASET = process.env.BQ_DATASET || 'vtntprod_vitta_core';
 
-// Singleton BigQuery client
 let bqClient: BigQuery | null = null;
 
 function getClient(): BigQuery {
   if (!bqClient) {
-    // First, try to use credentials from environment variable (Vercel)
     if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
       const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-      bqClient = new BigQuery({
-        projectId: PROJECT,
-        credentials,
-      });
+      bqClient = new BigQuery({ projectId: PROJECT, credentials });
     } else {
-      // Fallback to local file (development)
       const keyFilePath = path.resolve(process.cwd(), 'service-account.json');
       if (fs.existsSync(keyFilePath)) {
-        bqClient = new BigQuery({
-          projectId: PROJECT,
-          keyFilename: keyFilePath,
-        });
+        bqClient = new BigQuery({ projectId: PROJECT, keyFilename: keyFilePath });
       } else {
-        // Last resort: use default credentials
-        bqClient = new BigQuery({
-          projectId: PROJECT,
-        });
+        bqClient = new BigQuery({ projectId: PROJECT });
       }
     }
   }
   return bqClient;
 }
 
-// In-memory cache
 interface CacheEntry {
   data: unknown;
   expiresAt: number;
@@ -60,7 +47,6 @@ export async function runQuery<T = Record<string, unknown>>(
   const bq = getClient();
   const [rows] = await bq.query({ query: sql, location: 'US' });
 
-  // Convert BigQuery special types (dates, etc)
   const normalized = rows.map((row: Record<string, unknown>) => {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(row)) {
