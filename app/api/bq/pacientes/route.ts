@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server';
 import { runQuery, getBQConfig } from '@/lib/bigquery';
 
-const { PROJECT, DATASET: DS } = getBQConfig();
+const { PROJECT: _PROJECT, DATASET: _DS } = getBQConfig();
+
+// Fallback temporário para deploy na Vercel
+const PROJECT = 'high-nature-319701';
+const DS = 'vtntprod_vitta_core';
 
 export async function GET() {
   try {
     const kpis = await runQuery(`
-      SELECT
-        COUNT(*) AS total_pacientes
+      SELECT COUNT(*) AS total_pacientes
       FROM \`${PROJECT}.${DS}.patients\`
     `);
 

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { runQuery, getBQConfig } from '@/lib/bigquery';
+import { runQuery } from '@/lib/bigquery';
 
-const { PROJECT, DATASET: DS } = getBQConfig();
+const PROJECT = 'high-nature-319701';
+const DS = 'vtntprod_vitta_core';
 
 export async function GET() {
   try {
@@ -18,8 +19,7 @@ export async function GET() {
       runQuery(`
         SELECT
           FORMAT_DATE('%b/%y', DATE_TRUNC(created_at, MONTH)) AS mes,
-          ROUND(SUM(value)/100, 2) AS valor,
-          COUNT(*) AS transacoes
+          ROUND(SUM(value)/100, 2) AS valor
         FROM \`${PROJECT}.${DS}.pagamentos_recebidos\`
         WHERE created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH)
         GROUP BY 1
@@ -33,7 +33,7 @@ export async function GET() {
         total_a_receber: Number(t.total_a_receber || 0),
         qtde_transacoes: Number(t.qtde || 0),
       },
-      evolucao: (evolucao as { mes: string; valor: number; transacoes: number }[]).map(r => ({
+      evolucao: (evolucao as { mes: string; valor: number }[]).map(r => ({
         mes: r.mes,
         valor: Number(r.valor),
       })),

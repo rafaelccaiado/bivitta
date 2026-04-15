@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { runQuery, getBQConfig } from '@/lib/bigquery';
+import { runQuery } from '@/lib/bigquery';
 
-const { PROJECT, DATASET: DS } = getBQConfig();
+const PROJECT = 'high-nature-319701';
+const DS = 'vtntprod_vitta_core';
 
 export async function GET() {
   try {
