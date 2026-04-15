@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { runQuery } from '@/lib/bigquery';
+import { runQuery, BQ } from '@/lib/bigquery';
 
-const PROJECT = process.env.BQ_PROJECT!;
-const DS = process.env.BQ_DATASET!;
+const PROJECT = BQ.PROJECT;
+const DS = BQ.DATASET;
 
 // Status válidos por categoria (MAIÚSCULAS conforme BigQuery)
 const STATUS_REALIZADO  = `('CONCLUÍDO', 'PAGO', 'COMPARECEU')`;
@@ -17,40 +17,37 @@ export async function GET() {
 // KPIs MTD (data da consulta no mês atual)
       runQuery(`
         SELECT
-          -- Mês atual
-          COUNT(CASE WHEN DATE_TRUNC(DATE(start_exec,'America/Sao_Paulo'),MONTH) = DATE_TRUNC(CURRENT_DATE('America/Sao_Paulo'),MONTH)
+          COUNT(CASE WHEN DATE_TRUNC(DATE(start_exec),MONTH) = DATE_TRUNC(CURRENT_DATE(),MONTH)
                 THEN appointment_id END)                                    AS agendados_mtd,
-          COUNT(CASE WHEN DATE_TRUNC(DATE(start_exec,'America/Sao_Paulo'),MONTH) = DATE_TRUNC(CURRENT_DATE('America/Sao_Paulo'),MONTH)
+          COUNT(CASE WHEN DATE_TRUNC(DATE(start_exec),MONTH) = DATE_TRUNC(CURRENT_DATE(),MONTH)
                   AND status IN ${STATUS_REALIZADO} THEN appointment_id END) AS realizados_mtd,
-          COUNT(CASE WHEN DATE_TRUNC(DATE(start_exec,'America/Sao_Paulo'),MONTH) = DATE_TRUNC(CURRENT_DATE('America/Sao_Paulo'),MONTH)
+          COUNT(CASE WHEN DATE_TRUNC(DATE(start_exec),MONTH) = DATE_TRUNC(CURRENT_DATE(),MONTH)
                   AND status IN ${STATUS_NAOSHOW} THEN appointment_id END)   AS faltou_mtd,
-          COUNT(CASE WHEN DATE_TRUNC(DATE(start_exec,'America/Sao_Paulo'),MONTH) = DATE_TRUNC(CURRENT_DATE('America/Sao_Paulo'),MONTH)
+          COUNT(CASE WHEN DATE_TRUNC(DATE(start_exec),MONTH) = DATE_TRUNC(CURRENT_DATE(),MONTH)
                   AND status IN ${STATUS_CANCELADO} THEN appointment_id END) AS cancelados_mtd,
-          -- Taxa de conversão (realizados / agendados)
-          ROUND(COUNT(CASE WHEN DATE_TRUNC(DATE(start_exec,'America/Sao_Paulo'),MONTH) = DATE_TRUNC(CURRENT_DATE('America/Sao_Paulo'),MONTH)
+          ROUND(COUNT(CASE WHEN DATE_TRUNC(DATE(start_exec),MONTH) = DATE_TRUNC(CURRENT_DATE(),MONTH)
                   AND status IN ${STATUS_REALIZADO} THEN appointment_id END) * 100.0
-                / NULLIF(COUNT(CASE WHEN DATE_TRUNC(DATE(start_exec,'America/Sao_Paulo'),MONTH) = DATE_TRUNC(CURRENT_DATE('America/Sao_Paulo'),MONTH)
+                / NULLIF(COUNT(CASE WHEN DATE_TRUNC(DATE(start_exec),MONTH) = DATE_TRUNC(CURRENT_DATE(),MONTH)
                 THEN appointment_id END), 0), 1)                            AS conversao_pct_mtd,
-          -- Mesmo período mês anterior
-          COUNT(CASE WHEN DATE_TRUNC(DATE(start_exec,'America/Sao_Paulo'),MONTH) = DATE_TRUNC(DATE_SUB(CURRENT_DATE('America/Sao_Paulo'),INTERVAL 1 MONTH),MONTH)
-               AND EXTRACT(DAY FROM DATE(start_exec,'America/Sao_Paulo())) <= EXTRACT(DAY FROM CURRENT_DATE('America/Sao_Paulo'))
-                 THEN appointment_id END)                                    AS agendados_ant
+          COUNT(CASE WHEN DATE_TRUNC(DATE(start_exec),MONTH) = DATE_TRUNC(DATE_SUB(CURRENT_DATE(),INTERVAL 1 MONTH),MONTH)
+               AND EXTRACT(DAY FROM DATE(start_exec)) <= EXTRACT(DAY FROM CURRENT_DATE())
+                  THEN appointment_id END)                                    AS agendados_ant
         FROM \`${PROJECT}.${DS}.agendamentos\`
-        WHERE DATE(start_exec,'America/Sao_Paulo') >= DATE_TRUNC(DATE_SUB(CURRENT_DATE('America/Sao_Paulo'),INTERVAL 1 MONTH),MONTH)
+        WHERE DATE(start_exec) >= DATE_TRUNC(DATE_SUB(CURRENT_DATE(),INTERVAL 1 MONTH),MONTH)
       `),
 
       // Agendamentos por dia (últimos 60 dias)
       runQuery(`
         SELECT
-          DATE(start_exec,'America/Sao_Paulo')           AS data,
-          FORMAT_DATE('%d/%m', DATE(start_exec,'America/Sao_Paulo')) AS data_fmt,
+          DATE(start_exec)           AS data,
+          FORMAT_DATE('%d/%m', DATE(start_exec)) AS data_fmt,
           COUNT(appointment_id)                          AS total,
           COUNT(CASE WHEN status IN ${STATUS_REALIZADO}  THEN 1 END) AS realizados,
           COUNT(CASE WHEN status IN ${STATUS_NAOSHOW}    THEN 1 END) AS faltou,
           COUNT(CASE WHEN status IN ${STATUS_CANCELADO}  THEN 1 END) AS cancelados
         FROM \`${PROJECT}.${DS}.agendamentos\`
-        WHERE DATE(start_exec,'America/Sao_Paulo') >= DATE_SUB(CURRENT_DATE('America/Sao_Paulo'), INTERVAL 60 DAY)
-          AND DATE(start_exec,'America/Sao_Paulo') < CURRENT_DATE('America/Sao_Paulo')
+        WHERE DATE(start_exec) >= DATE_SUB(CURRENT_DATE('America/Sao_Paulo'), INTERVAL 60 DAY)
+          AND DATE(start_exec) < CURRENT_DATE('America/Sao_Paulo')
         GROUP BY data
         ORDER BY data ASC
       `),
@@ -64,7 +61,7 @@ export async function GET() {
           ROUND(COUNT(CASE WHEN status IN ${STATUS_REALIZADO} THEN 1 END) * 100.0
                 / NULLIF(COUNT(appointment_id), 0), 1)  AS conversao_pct
         FROM \`${PROJECT}.${DS}.agendamentos\`
-        WHERE DATE_TRUNC(DATE(start_exec,'America/Sao_Paulo'),MONTH)
+        WHERE DATE_TRUNC(DATE(start_exec),MONTH)
               = DATE_TRUNC(CURRENT_DATE('America/Sao_Paulo'),MONTH)
         GROUP BY canal
         ORDER BY total DESC
@@ -80,7 +77,7 @@ export async function GET() {
           ROUND(COUNT(CASE WHEN status IN ${STATUS_REALIZADO} THEN 1 END) * 100.0
                 / NULLIF(COUNT(appointment_id), 0), 1)  AS conversao_pct
         FROM \`${PROJECT}.${DS}.agendamentos\`
-        WHERE DATE_TRUNC(DATE(start_exec,'America/Sao_Paulo'),MONTH)
+        WHERE DATE_TRUNC(DATE(start_exec),MONTH)
               = DATE_TRUNC(CURRENT_DATE('America/Sao_Paulo'),MONTH)
         GROUP BY name_unit
         ORDER BY total DESC
@@ -89,14 +86,14 @@ export async function GET() {
       // Evolução mensal (últimos 12 meses)
       runQuery(`
         SELECT
-          DATE_TRUNC(DATE(start_exec,'America/Sao_Paulo'),MONTH) AS mes,
-          FORMAT_DATE('%b/%y', DATE_TRUNC(DATE(start_exec,'America/Sao_Paulo'),MONTH)) AS mes_fmt,
+          DATE_TRUNC(DATE(start_exec),MONTH) AS mes,
+          FORMAT_DATE('%b/%y', DATE_TRUNC(DATE(start_exec),MONTH)) AS mes_fmt,
           COUNT(appointment_id)                                   AS total,
           COUNT(CASE WHEN status IN ${STATUS_REALIZADO} THEN 1 END) AS realizados,
           ROUND(COUNT(CASE WHEN status IN ${STATUS_REALIZADO} THEN 1 END) * 100.0
                 / NULLIF(COUNT(appointment_id), 0), 1)           AS conversao_pct
         FROM \`${PROJECT}.${DS}.agendamentos\`
-        WHERE DATE(start_exec,'America/Sao_Paulo') >= DATE_SUB(CURRENT_DATE('America/Sao_Paulo'), INTERVAL 12 MONTH)
+        WHERE DATE(start_exec) >= DATE_SUB(CURRENT_DATE('America/Sao_Paulo'), INTERVAL 12 MONTH)
         GROUP BY mes
         ORDER BY mes ASC
       `),
@@ -104,7 +101,7 @@ export async function GET() {
       // Por dia da semana
       runQuery(`
         SELECT
-          CASE EXTRACT(DAYOFWEEK FROM DATE(start_exec,'America/Sao_Paulo'))
+          CASE EXTRACT(DAYOFWEEK FROM DATE(start_exec))
             WHEN 1 THEN '1_Dom' WHEN 2 THEN '2_Seg' WHEN 3 THEN '3_Ter'
             WHEN 4 THEN '4_Qua' WHEN 5 THEN '5_Qui' WHEN 6 THEN '6_Sex'
             WHEN 7 THEN '7_Sáb'
@@ -113,7 +110,7 @@ export async function GET() {
           COUNT(CASE WHEN status IN ${STATUS_REALIZADO} THEN 1 END) AS realizados
         FROM \`${PROJECT}.${DS}.agendamentos\`
         WHERE status IN ${STATUS_REALIZADO}
-          AND DATE(start_exec,'America/Sao_Paulo') >= DATE_SUB(CURRENT_DATE('America/Sao_Paulo'), INTERVAL 90 DAY)
+          AND DATE(start_exec) >= DATE_SUB(CURRENT_DATE('America/Sao_Paulo'), INTERVAL 90 DAY)
           AND start_exec IS NOT NULL
         GROUP BY dia_semana
         ORDER BY dia_semana ASC
@@ -125,7 +122,7 @@ export async function GET() {
           status,
           COUNT(*) AS total
         FROM \`${PROJECT}.${DS}.agendamentos\`
-        WHERE DATE_TRUNC(DATE(start_exec,'America/Sao_Paulo'),MONTH)
+        WHERE DATE_TRUNC(DATE(start_exec),MONTH)
               = DATE_TRUNC(CURRENT_DATE('America/Sao_Paulo'),MONTH)
         GROUP BY status
         ORDER BY total DESC
