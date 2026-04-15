@@ -1,19 +1,37 @@
 import { BigQuery } from '@google-cloud/bigquery';
+import fs from 'fs';
 import path from 'path';
 
-const PROJECT = 'high-nature-319701';
-const DATASET = 'vtntprod_vitta_core';
+const PROJECT = process.env.BQ_PROJECT || 'high-nature-319701';
+const DATASET = process.env.BQ_DATASET || 'vtntprod_vitta_core';
 
 // Singleton BigQuery client
 let bqClient: BigQuery | null = null;
 
 function getClient(): BigQuery {
   if (!bqClient) {
-    const keyFilePath = path.resolve(process.cwd(), 'service-account.json');
-    bqClient = new BigQuery({
-      projectId: PROJECT,
-      keyFilename: keyFilePath,
-    });
+    // First, try to use credentials from environment variable (Vercel)
+    if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+      const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+      bqClient = new BigQuery({
+        projectId: PROJECT,
+        credentials,
+      });
+    } else {
+      // Fallback to local file (development)
+      const keyFilePath = path.resolve(process.cwd(), 'service-account.json');
+      if (fs.existsSync(keyFilePath)) {
+        bqClient = new BigQuery({
+          projectId: PROJECT,
+          keyFilename: keyFilePath,
+        });
+      } else {
+        // Last resort: use default credentials
+        bqClient = new BigQuery({
+          projectId: PROJECT,
+        });
+      }
+    }
   }
   return bqClient;
 }
@@ -25,7 +43,7 @@ interface CacheEntry {
 }
 const cache = new Map<string, CacheEntry>();
 
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const CACHE_TTL_MS = (parseInt(process.env.CACHE_TTL_MINUTES || '60') || 60) * 60 * 1000;
 
 export async function runQuery<T = Record<string, unknown>>(
   sql: string,
