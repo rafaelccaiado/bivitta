@@ -2,40 +2,26 @@ import { BigQuery } from '@google-cloud/bigquery';
 import fs from 'fs';
 import path from 'path';
 
-// Forces evaluation at runtime, not build time
-const getEnv = (key: string, fallback: string): string => {
-  if (typeof process !== 'undefined' && process.env && process.env[key]) {
-    return process.env[key]!;
-  }
-  return fallback;
-};
-
-const PROJECT = getEnv('BQ_PROJECT', 'high-nature-319701');
-const DATASET = getEnv('BQ_DATASET', 'vtntprod_vitta_core');
-
 let bqClient: BigQuery | null = null;
 
 function getClient(): BigQuery {
   if (!bqClient) {
-    const credsJson = getEnv('GOOGLE_APPLICATION_CREDENTIALS_JSON', '');
+    const projectId = process.env.BQ_PROJECT || 'high-nature-319701';
+    const credsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
+    
     if (credsJson) {
       try {
         const credentials = JSON.parse(credsJson);
-        bqClient = new BigQuery({ projectId: PROJECT, credentials });
+        bqClient = new BigQuery({ projectId, credentials });
       } catch {
-        const keyFilePath = path.resolve(process.cwd(), 'service-account.json');
-        if (fs.existsSync(keyFilePath)) {
-          bqClient = new BigQuery({ projectId: PROJECT, keyFilename: keyFilePath });
-        } else {
-          bqClient = new BigQuery({ projectId: PROJECT });
-        }
+        bqClient = new BigQuery({ projectId });
       }
     } else {
       const keyFilePath = path.resolve(process.cwd(), 'service-account.json');
       if (fs.existsSync(keyFilePath)) {
-        bqClient = new BigQuery({ projectId: PROJECT, keyFilename: keyFilePath });
+        bqClient = new BigQuery({ projectId, keyFilename: keyFilePath });
       } else {
-        bqClient = new BigQuery({ projectId: PROJECT });
+        bqClient = new BigQuery({ projectId });
       }
     }
   }
@@ -48,7 +34,7 @@ interface CacheEntry {
 }
 const cache = new Map<string, CacheEntry>();
 
-const CACHE_TTL_MS = (parseInt(getEnv('CACHE_TTL_MINUTES', '60')) || 60) * 60 * 1000;
+const CACHE_TTL_MS = (parseInt(process.env.CACHE_TTL_MINUTES || '60') || 60) * 60 * 1000;
 
 export async function runQuery<T = Record<string, unknown>>(
   sql: string,
@@ -81,4 +67,10 @@ export async function runQuery<T = Record<string, unknown>>(
   return normalized as T[];
 }
 
-export const BQ = { PROJECT, DATASET };
+// Função helper para obter PROJECT e DS
+export function getBQConfig() {
+  return {
+    PROJECT: process.env.BQ_PROJECT || 'high-nature-319701',
+    DATASET: process.env.BQ_DATASET || 'vtntprod_vitta_core',
+  };
+}
