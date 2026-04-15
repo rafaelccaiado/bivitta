@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { runQuery } from '@/lib/bigquery';
+import { runQuery, BQ } from '@/lib/bigquery';
 
-const PROJECT = process.env.BQ_PROJECT!;
-const DS = process.env.BQ_DATASET!;
+const PROJECT = BQ.PROJECT;
+const DS = BQ.DATASET;
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

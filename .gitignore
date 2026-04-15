@@ -3,3 +3,5 @@ service-account.json
 .next/
 node_modules/
 .DS_Store
+
+.vercel
