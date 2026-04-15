@@ -18,15 +18,11 @@ async function getRecebiveisData() {
 
       runQuery(`
         SELECT
-          CASE
-            WHEN expected_date IS NULL THEN 'Sem data'
-            ELSE 'Pendente'
-          END AS faixa,
+          'Pendente' AS faixa,
           ROUND(SUM(value)/100, 2) AS valor,
           COUNT(*) AS qtde
         FROM \`${PROJECT}.${DS}.pagamentos_recebidos\`
         WHERE status IS NULL OR status NOT IN ('Pago', 'Confirmado', 'CANCELADO')
-        GROUP BY 1
       `),
 
       runQuery(`
@@ -38,7 +34,7 @@ async function getRecebiveisData() {
         WHERE (status IS NULL OR status NOT IN ('Pago', 'Confirmado', 'CANCELADO'))
           AND expected_date >= CURRENT_DATE()
           AND expected_date <= DATE_ADD(CURRENT_DATE(), INTERVAL 30 DAY)
-        GROUP BY data
+        GROUP BY DATE(expected_date)
         ORDER BY data ASC
       `),
 
@@ -112,14 +108,13 @@ export async function GET(request: Request) {
 
       runQuery(`
         SELECT
-          DATE_TRUNC(created_at, MONTH) AS mes,
           FORMAT_DATE('%b/%y', DATE_TRUNC(created_at, MONTH)) AS mes_fmt,
           ROUND(SUM(value)/100, 2) AS recebido,
           COUNT(*) AS transacoes
         FROM \`${PROJECT}.${DS}.pagamentos_recebidos\`
         WHERE created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH)
-        GROUP BY mes
-        ORDER BY mes ASC
+        GROUP BY FORMAT_DATE('%b/%y', DATE_TRUNC(created_at, MONTH))
+        ORDER BY MIN(created_at) ASC
       `),
 
       runQuery(`
@@ -129,7 +124,7 @@ export async function GET(request: Request) {
           COUNT(*) AS transacoes
         FROM \`${PROJECT}.${DS}.pagamentos_recebidos\`
         WHERE DATE_TRUNC(created_at, MONTH) = DATE_TRUNC(CURRENT_DATE(), MONTH)
-        GROUP BY 1
+        GROUP BY COALESCE(pay_form_id, 'Outros')
         ORDER BY valor DESC
         LIMIT 10
       `),

@@ -46,8 +46,8 @@ export async function GET() {
           COUNT(CASE WHEN status IN ${STATUS_NAOSHOW}    THEN 1 END) AS faltou,
           COUNT(CASE WHEN status IN ${STATUS_CANCELADO}  THEN 1 END) AS cancelados
         FROM \`${PROJECT}.${DS}.agendamentos\`
-        WHERE DATE(start_exec) >= DATE_SUB(CURRENT_DATE('America/Sao_Paulo'), INTERVAL 60 DAY)
-          AND DATE(start_exec) < CURRENT_DATE('America/Sao_Paulo')
+        WHERE DATE(start_exec) >= DATE_SUB(CURRENT_DATE(), INTERVAL 60 DAY)
+          AND DATE(start_exec) < CURRENT_DATE()
         GROUP BY data
         ORDER BY data ASC
       `),
@@ -62,7 +62,7 @@ export async function GET() {
                 / NULLIF(COUNT(appointment_id), 0), 1)  AS conversao_pct
         FROM \`${PROJECT}.${DS}.agendamentos\`
         WHERE DATE_TRUNC(DATE(start_exec),MONTH)
-              = DATE_TRUNC(CURRENT_DATE('America/Sao_Paulo'),MONTH)
+              = DATE_TRUNC(CURRENT_DATE(),MONTH)
         GROUP BY canal
         ORDER BY total DESC
       `),
@@ -78,7 +78,7 @@ export async function GET() {
                 / NULLIF(COUNT(appointment_id), 0), 1)  AS conversao_pct
         FROM \`${PROJECT}.${DS}.agendamentos\`
         WHERE DATE_TRUNC(DATE(start_exec),MONTH)
-              = DATE_TRUNC(CURRENT_DATE('America/Sao_Paulo'),MONTH)
+              = DATE_TRUNC(CURRENT_DATE(),MONTH)
         GROUP BY name_unit
         ORDER BY total DESC
       `),
@@ -93,7 +93,7 @@ export async function GET() {
           ROUND(COUNT(CASE WHEN status IN ${STATUS_REALIZADO} THEN 1 END) * 100.0
                 / NULLIF(COUNT(appointment_id), 0), 1)           AS conversao_pct
         FROM \`${PROJECT}.${DS}.agendamentos\`
-        WHERE DATE(start_exec) >= DATE_SUB(CURRENT_DATE('America/Sao_Paulo'), INTERVAL 12 MONTH)
+        WHERE DATE(start_exec) >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH)
         GROUP BY mes
         ORDER BY mes ASC
       `),
@@ -110,7 +110,7 @@ export async function GET() {
           COUNT(CASE WHEN status IN ${STATUS_REALIZADO} THEN 1 END) AS realizados
         FROM \`${PROJECT}.${DS}.agendamentos\`
         WHERE status IN ${STATUS_REALIZADO}
-          AND DATE(start_exec) >= DATE_SUB(CURRENT_DATE('America/Sao_Paulo'), INTERVAL 90 DAY)
+          AND DATE(start_exec) >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAY)
           AND start_exec IS NOT NULL
         GROUP BY dia_semana
         ORDER BY dia_semana ASC
@@ -123,7 +123,7 @@ export async function GET() {
           COUNT(*) AS total
         FROM \`${PROJECT}.${DS}.agendamentos\`
         WHERE DATE_TRUNC(DATE(start_exec),MONTH)
-              = DATE_TRUNC(CURRENT_DATE('America/Sao_Paulo'),MONTH)
+              = DATE_TRUNC(CURRENT_DATE(),MONTH)
         GROUP BY status
         ORDER BY total DESC
         LIMIT 20

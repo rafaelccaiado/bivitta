@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
-import { runQuery } from '@/lib/bigquery';
+import { runQuery, BQ } from '@/lib/bigquery';
+
+const PROJECT = BQ.PROJECT;
+const DS = BQ.DATASET;
 
 export const dynamic = 'force-dynamic';
 
@@ -16,10 +19,9 @@ export async function GET() {
         SELECT 
           patient_id,
           MIN(DATE(created_at)) as data_primeira
-        FROM \`high-nature-319701.vtntprod_vitta_core.sales_orders\`
+FROM \`${PROJECT}.${DS}.sales_orders\`
         WHERE status NOT IN (3, 4)
-          AND EXTRACT(YEAR FROM created_at) BETWEEN 2020 AND 2030
-        GROUP BY 1
+          AND created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 24 MONTH)
       ),
       pedidos_mes AS (
         SELECT 
@@ -27,7 +29,7 @@ export async function GET() {
           so.patient_id,
           DATE(so.created_at) as data_pedido,
           pc.data_primeira
-        FROM \`high-nature-319701.vtntprod_vitta_core.sales_orders\` so
+        FROM \`${PROJECT}.${DS}.sales_orders\` so
         JOIN primeira_consulta pc ON pc.patient_id = so.patient_id
         WHERE so.status NOT IN (3, 4)
           AND DATE(so.created_at) >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH)
