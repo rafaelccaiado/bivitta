@@ -1,0 +1,275 @@
+{
+  "reportId": "f24aa959-1687-4334-a64b-e6f6c4892fe5",
+  "reportName": "Rascunho Clínica Vitta",
+  "extractedAt": "2026-04-14T18:44:00Z",
+  "pagesTotal": 25,
+  "pages": [
+    {
+      "order": 1,
+      "pageId": "p_2zsuj9ui8c",
+      "label": "Venda mensal - Valor",
+      "topic": "receita",
+      "suggestedRoute": "/receita",
+      "charts": ["RECEITA POR DIA - REAIS", "CONSULTAS POR DIA - QUANTIDADE", "RECEITA MÉDIA POR DIA DA SEMANA - REAIS"],
+      "tables": ["agendamentos", "pedidos_venda"],
+      "priority": 1
+    },
+    {
+      "order": 2,
+      "pageId": "p_j0kf9bdncd",
+      "label": "Venda trimestral - Valor",
+      "topic": "receita",
+      "suggestedRoute": "/receita/trimestral",
+      "charts": ["Receita no trimestre"],
+      "tables": ["pedidos_venda"],
+      "priority": 2
+    },
+    {
+      "order": 3,
+      "pageId": "p_lca40ey2cd",
+      "label": "Venda mensal - Quantidade",
+      "topic": "consultas",
+      "suggestedRoute": "/consultas/volume",
+      "charts": ["Acumulado de consultas - Quantidade", "Acumulado de Exames Laboratoriais - Quantidade"],
+      "tables": ["agendamentos", "pedidos_venda"],
+      "priority": 2
+    },
+    {
+      "order": 4,
+      "pageId": "p_d10va4g7id",
+      "label": "Qtde Atendimentos",
+      "topic": "consultas",
+      "suggestedRoute": "/consultas",
+      "charts": ["QUANTIDADE DE CONSULTAS POR UNIDADE"],
+      "tables": ["agendamentos"],
+      "priority": 1
+    },
+    {
+      "order": 5,
+      "pageId": "p_tkp839i0fd",
+      "label": "Receita e conversão",
+      "topic": "receita",
+      "suggestedRoute": "/receita/conversao",
+      "charts": ["Receita vs Conversão", "Funil de conversão"],
+      "tables": ["pedidos_venda", "agendamentos"],
+      "priority": 2
+    },
+    {
+      "order": 6,
+      "pageId": "p_k9dj6qxgcd",
+      "label": "Agendamento - Marcação/Criação",
+      "topic": "agendamentos",
+      "suggestedRoute": "/agendamentos/marcacao",
+      "charts": ["Agendamento marcação 2025/2026", "Canal de origem (WhatsApp, Call Center, App)"],
+      "tables": ["agendamentos"],
+      "priority": 2
+    },
+    {
+      "order": 7,
+      "pageId": "p_qe0rdaroad",
+      "label": "Confirmação agenda",
+      "topic": "agendamentos",
+      "suggestedRoute": "/agendamentos/confirmacao",
+      "charts": ["Taxa de confirmação", "Status dos agendamentos (Confirmado, Pendente)"],
+      "tables": ["agendamentos"],
+      "priority": 3
+    },
+    {
+      "order": 8,
+      "pageId": "p_ljkcqjs0fd",
+      "label": "Agendamento - Execução",
+      "topic": "agendamentos",
+      "suggestedRoute": "/agendamentos/execucao",
+      "charts": ["Dia da semana - Execução", "Canal de origem"],
+      "tables": ["agendamentos"],
+      "priority": 3
+    },
+    {
+      "order": 9,
+      "pageId": "p_eudqh8rrhd",
+      "label": "Odontologia",
+      "topic": "odontologia",
+      "suggestedRoute": "/odontologia",
+      "charts": ["AGENDAMENTOS de Odonto", "AVALIAÇÕES", "VENDAS Odonto - Qtde paciente"],
+      "tables": ["agendamentos", "pedidos_venda"],
+      "priority": 2
+    },
+    {
+      "order": 10,
+      "pageId": "p_v4y37n7lfd",
+      "label": "Novos Pacientes",
+      "topic": "pacientes",
+      "suggestedRoute": "/pacientes/novos",
+      "charts": ["Novos cadastros (created_at, nome, unidade)"],
+      "tables": ["patients", "users"],
+      "priority": 2
+    },
+    {
+      "order": 11,
+      "pageId": "p_ncbjrpbuid",
+      "label": "Receita por consultor",
+      "topic": "receita",
+      "suggestedRoute": "/receita/consultor",
+      "charts": ["criado_em / valor_total_unidade por Consultor"],
+      "tables": ["pedidos_venda", "vw_margem_desconto_repasse_item_prof"],
+      "priority": 3
+    },
+    {
+      "order": 12,
+      "pageId": "p_w4hzkiub8c",
+      "label": "Receita consolidada por dia",
+      "topic": "receita",
+      "suggestedRoute": "/receita/diaria",
+      "charts": ["Receita por dia - R$", "Receita por semana - R$"],
+      "tables": ["pedidos_venda"],
+      "priority": 1
+    },
+    {
+      "order": 13,
+      "pageId": "p_hs5a0p2o8c",
+      "label": "Atendimentos - Relatório RI",
+      "topic": "consultas",
+      "suggestedRoute": "/consultas/ri",
+      "charts": ["Atendimento de pacientes únicos (Pivot)", "Ticket médio - Por quantidade"],
+      "tables": ["agendamentos", "pedidos_venda"],
+      "priority": 3
+    },
+    {
+      "order": 14,
+      "pageId": "p_97b8ul2obd",
+      "label": "Dash Call Center",
+      "topic": "callcenter",
+      "suggestedRoute": "/callcenter",
+      "charts": ["Agendamento Dia/Mês KPIs", "Ranking de atendentes", "Total agendamentos hoje"],
+      "tables": ["agendamentos"],
+      "priority": 1
+    },
+    {
+      "order": 15,
+      "pageId": "p_40aa6r4g7c",
+      "label": "A receber Cartão de Crédito",
+      "topic": "financeiro",
+      "suggestedRoute": "/financeiro/recebiveis",
+      "charts": ["Valores a receber - Cartão Crédito/Débito", "Total a receber Mês/30 dias"],
+      "tables": ["vittanet_vittapag_recebiveis", "vittanet_vittapag_pagamentos"],
+      "priority": 2
+    },
+    {
+      "order": 16,
+      "pageId": "p_c2at1cdh8c",
+      "label": "Qtde pedidos e Margem Itens",
+      "topic": "receita",
+      "suggestedRoute": "/receita/margem",
+      "charts": ["Quantidade de pedidos 2022 x 2023", "Distribuição de status (Pie)"],
+      "tables": ["pedidos_venda", "vw_margem_desconto_repasse_item_prof"],
+      "priority": 2
+    },
+    {
+      "order": 17,
+      "pageId": "p_x7zbuucd8c",
+      "label": "Servicos por pacientes",
+      "topic": "pacientes",
+      "suggestedRoute": "/pacientes/servicos",
+      "charts": ["Serviços por paciente (paciente_id, data, unidade, serviço, valor)"],
+      "tables": ["pedidos_venda", "agendamentos"],
+      "priority": 3
+    },
+    {
+      "order": 18,
+      "pageId": "p_9ljslelpcd",
+      "label": "Cadastro de pacientes",
+      "topic": "pacientes",
+      "suggestedRoute": "/pacientes/cadastro",
+      "charts": ["Registro detalhado (id, cpf, nome, telefone, endereço)"],
+      "tables": ["patients", "users"],
+      "priority": 3
+    },
+    {
+      "order": 19,
+      "pageId": "49281730",
+      "label": "Pacientes recorrencia",
+      "topic": "pacientes",
+      "suggestedRoute": "/pacientes/recorrencia",
+      "charts": ["RECORRÊNCIA DE PACIENTES (Pivot)", "ESPECIALIDADES (Pivot por mês)"],
+      "tables": ["agendamentos", "patients"],
+      "priority": 2
+    },
+    {
+      "order": 20,
+      "pageId": "p_3mbl97fe8c",
+      "label": "Recebimento",
+      "topic": "financeiro",
+      "suggestedRoute": "/financeiro/recebimento",
+      "charts": ["Tabela (paciente_nome, unidade_nome, vittapag_id, valor)"],
+      "tables": ["vittanet_vittapag_pagamentos", "vittanet_vittapag_recebiveis"],
+      "priority": 3
+    },
+    {
+      "order": 21,
+      "pageId": "p_6uxe9qzc8c",
+      "label": "Agendamento",
+      "topic": "agendamentos",
+      "suggestedRoute": "/agendamentos",
+      "charts": ["Conversão por mês (Conclusão) ~58%", "Status bar chart detalhado"],
+      "tables": ["agendamentos"],
+      "priority": 1
+    },
+    {
+      "order": 22,
+      "pageId": "p_iianfl9qdd",
+      "label": "Ligações OKR",
+      "topic": "callcenter",
+      "suggestedRoute": "/callcenter/ligacoes",
+      "charts": ["Quantidade de Ligações (2022-2024)", "Quantidade de Agendamentos (2023-2024)"],
+      "tables": ["agendamentos"],
+      "priority": 3
+    },
+    {
+      "order": 23,
+      "pageId": "p_2fniq2y0fd",
+      "label": "Agendamento OKR",
+      "topic": "agendamentos",
+      "suggestedRoute": "/agendamentos/okr",
+      "charts": ["Agendamentos - Quantidade por mês - Somente Consulta (Pivot)", "Conversão %"],
+      "tables": ["agendamentos"],
+      "priority": 3
+    },
+    {
+      "order": 24,
+      "pageId": "p_y6q9igsmad",
+      "label": "Nota Fiscal OKR",
+      "topic": "receita",
+      "suggestedRoute": "/receita/okr",
+      "charts": ["Faturamento por unidade - mês (Pivot)", "Faturamento por Origem (Interno/Externo)"],
+      "tables": ["pedidos_venda"],
+      "priority": 3
+    },
+    {
+      "order": 25,
+      "pageId": "p_ewq5vxs2fd",
+      "label": "Ticket médio OKR",
+      "topic": "receita",
+      "suggestedRoute": "/receita/ticket",
+      "charts": ["Ticket médio por unidade - mês (R$ / Quantidade)", "Ticket médio por pedido"],
+      "tables": ["pedidos_venda"],
+      "priority": 3
+    }
+  ],
+  "topics": {
+    "receita": ["Venda mensal - Valor", "Venda trimestral - Valor", "Receita e conversão", "Receita por consultor", "Receita consolidada por dia", "Qtde pedidos e Margem Itens", "Nota Fiscal OKR", "Ticket médio OKR"],
+    "consultas": ["Venda mensal - Quantidade", "Qtde Atendimentos", "Atendimentos - Relatório RI"],
+    "agendamentos": ["Agendamento - Marcação/Criação", "Confirmação agenda", "Agendamento - Execução", "Agendamento", "Agendamento OKR"],
+    "pacientes": ["Novos Pacientes", "Servicos por pacientes", "Cadastro de pacientes", "Pacientes recorrencia"],
+    "financeiro": ["A receber Cartão de Crédito", "Recebimento"],
+    "callcenter": ["Dash Call Center", "Ligações OKR"],
+    "odontologia": ["Odontologia"]
+  },
+  "priorityRoutes": [
+    { "route": "/receita", "label": "Receita", "pages": [1, 12], "priority": 1 },
+    { "route": "/agendamentos", "label": "Agendamentos", "pages": [21, 4], "priority": 1 },
+    { "route": "/pacientes", "label": "Pacientes", "pages": [10, 19], "priority": 1 },
+    { "route": "/callcenter", "label": "Call Center", "pages": [14], "priority": 1 },
+    { "route": "/odontologia", "label": "Odontologia", "pages": [9], "priority": 2 },
+    { "route": "/financeiro", "label": "Financeiro", "pages": [15, 20], "priority": 2 }
+  ]
+}
