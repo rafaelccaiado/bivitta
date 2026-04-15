@@ -10,8 +10,7 @@ export async function GET() {
 
       runQuery(`
         SELECT
-          COUNT(*) AS total_agendamentos,
-          COUNTIF(status IN ('CONCLUÍDO','PAGO','COMPARECEU')) AS realizados
+          COUNT(*) AS total_agendamentos
         FROM \`${PROJECT}.${DS}.agendamentos\`
         WHERE DATE(start_exec) >= DATE_TRUNC(DATE_SUB(CURRENT_DATE(),INTERVAL 1 MONTH),MONTH)
       `),
@@ -45,7 +44,7 @@ export async function GET() {
     return NextResponse.json({
       kpis: {
         agendados_mtd: Number(k.total_agendamentos || 0),
-        realizados_mtd: Number(k.realizados || 0),
+        realizados_mtd: 0,
       },
       porDia: (porDia as { data: string; data_fmt: string; total: number }[]).map(r => ({
         data: r.data_fmt,
